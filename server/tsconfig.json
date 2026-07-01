@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2022",
+    "lib": ["ES2016", "DOM"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "rootDir": "./src",
+    // "baseUrl": "./src",
+    // "paths": {
+    //   "@/Config/*": ["Config/*"],
+    //   "@/Utils/*": ["Utils/*"],
+    //   "@/*": ["*"]
+    // },
+    "outDir": "./dist",
+    "incremental": true,             // 🔥 MUST
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+
+    "skipLibCheck": true
+  },
+
+  "include": ["src/**/*.ts", "src/**/*.tsx", "types.d.ts"],
+  "exclude": ["node_modules", "./dist/**/*"]
+}
+

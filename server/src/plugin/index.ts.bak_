@@ -1,0 +1,200 @@
+import cors from "@fastify/cors";
+import fastifyJwt from "@fastify/jwt";
+import fastifyMongo from "@fastify/mongodb";
+import fastifyMultipart from "@fastify/multipart";
+import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyStatic from "@fastify/static";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
+import { FastifyInstance } from "fastify";
+import { resolve } from "node:path";
+
+// =============================== Local ================================
+import { ENV } from "../config";
+import { UPLOAD_DIR, UPLOAD_TEMP_DIR } from "../constants";
+import { authenticate, BYPASS_API_KEY } from "../Middleware/authenticate.middleware";
+
+// =============================== ROUTES ===============================
+import { authRoutes } from "../Routes/auth/authRoutes";
+import { bodRoutes } from "../Routes/boardOfDirectors/bodRoutes";
+import { applicationRoutes } from "../Routes/career/application/applicationRoutes";
+import { jobRoutes } from "../Routes/career/job/jobRoutes";
+import { jobCategoryRoutes } from "../Routes/career/jobCategory/jobCategoryRoutes";
+import { caseStudyRoutes } from "../Routes/caseStudy/caseStudyRoutes";
+import { brochureRoutes } from "../Routes/brochure/brochureRoutes";
+import { resourceCategoryRoutes } from "../Routes/resourceCategory/resourceCategoryRoutes";
+import { contactRoutes } from "../Routes/contact/contactRoutes";
+import { annualReportRoutes } from "../Routes/investor/annualReport/annualReportRoutes";
+import { financialInfoRoutes } from "../Routes/investor/financialInfo/financialInfoRoutes";
+import { policyRoutes } from "../Routes/investor/policy/policyRoutes";
+import { mainLocationRoutes } from "../Routes/mainLocation/mainLocationRoutes";
+import { menuRoutes } from "../Routes/menu/menuRoutes";
+import { officeRoutes } from "../Routes/office/officeRoutes";
+import { pageRoutes } from "../Routes/page/pageRoutes";
+import { partnerAndAllianceRoutes } from "../Routes/partnerAndAlliance/partnerAndAllianceRoutes";
+import { pressReleaseRoutes } from "../Routes/pressRelease/pressReleaseRoutes";
+import { publicRoutes } from "../Routes/public/publicRoutes";
+import { sliderRoutes } from "../Routes/slider/sliderRoutes";
+import { templateRoutes } from "../Routes/template/templateRoutes";
+import { userRoutes } from "../Routes/user/userRoutes";
+import { noticeRoutes } from "../Routes/investor/notice/noticeRoutes";
+import { committeeRoutes } from "../Routes/investor/committee/committeeRoutes";
+import { stockExchangeFilingRoutes } from "../Routes/investor/stockExchangeFilling/stockExchangeFillingRoutes";
+import { pdfRoutes } from "../Routes/investor/pdf/pdfRoutes";
+import { pdfWithTitleRoutes } from "../Routes/investor/pdfWithTitle/pdfWithTitleRoutes";
+import { shareHoldingPatternRoutes } from "../Routes/investor/shareholdingPattern/shareHoldingPatternRoutes";
+import { subsidiariesFinancialRoutes } from "../Routes/investor/subsidiariesFinancial/subsidiariesFinancialRoutes";
+import { postalBallotRoutes } from "../Routes/investor/postalBallot/postalBallotRoutes";
+import { investorFeedbackRoutes } from "../Routes/investor/investorFeedback/investorFeedbackRoutes";
+import { buyBackRoutes } from "../Routes/investor/buyBack/buyBackRoutes";
+import { tradingWindowRoutes } from "../Routes/investor/tradingWindow/tradingWindowRoutes";
+import { cacheRoutes } from "../Routes/cache/cacheRoutes";
+
+export const registerPlugins = async (app: FastifyInstance) => {
+  try {
+    // ============================ DB ============================
+    await app.register(fastifyMongo, { url: ENV.MONGO_URI });
+
+    // ============================ MULTIPART (GLOBAL – NO LIMITS) ============================
+    await app.register(fastifyMultipart, {
+      limits: {
+        fileSize: 50 * 1024 * 1024, // 50 MB
+        files: 1,
+      },
+    });
+
+    // ============================ STATIC FILES ============================
+    const uploadDir = resolve(process.cwd(), UPLOAD_DIR);
+    const uploadTempDir = resolve(process.cwd(), UPLOAD_TEMP_DIR);
+
+    await app.register(fastifyStatic, {
+      root: uploadDir,
+      prefix: "/images/",
+      cacheControl: true,
+      etag: true,
+      maxAge: 604800000,
+    });
+
+    await app.register(fastifyStatic, {
+      root: uploadTempDir,
+      prefix: "/temp-images/",
+      decorateReply: false,
+    });
+
+    // ============================ CORS ============================
+    await app.register(cors, {
+      origin: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTION"],
+    });
+
+    // ============================ JWT ============================
+    await app.register(fastifyJwt, {
+      secret: ENV.JWT_SECRET,
+      sign: { expiresIn: "24h" },
+    });
+
+    // ============================ SWAGGER ============================
+    await app.register(fastifySwagger, {
+      openapi: {
+        info: {
+          title: "MINDTECK CMS API",
+          description: "API documentation for the MINDTECK CMS",
+          version: "1.0.0",
+        },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+            },
+            apiKeyAuth: {
+              type: "apiKey",
+              in: "header",
+              name: "x-api-key",
+              description: BYPASS_API_KEY,
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }, { apiKeyAuth: [] }],
+        servers: [{ url: "http://localhost:9000/api" }],
+      },
+    });
+
+    await app.register(fastifySwaggerUi, {
+      routePrefix: "/docs",
+    });
+
+    // ============================ AUTH HOOK ============================
+    app.addHook("onRequest", async (req, reply) => {
+      if (
+        req.raw.url?.startsWith("/api/public") ||
+        req.raw.url?.startsWith("/docs") ||
+        req.raw.url?.startsWith("/images") ||
+        req.raw.url?.startsWith("/temp-images")
+      ) {
+        return;
+      }
+      await authenticate(req, reply);
+    });
+
+    // ============================ PROTECTED ROUTES ============================
+    const registerProtectedRoutes = async (instance: FastifyInstance) => {
+      if (process.env.NODE_ENV === "production") {
+        instance.register(fastifyRateLimit, {
+          max: 60,
+          timeWindow: "1 minute",
+        });
+      }
+
+      instance.register(menuRoutes, { prefix: "menu" });
+      instance.register(userRoutes, { prefix: "user" });
+      instance.register(authRoutes, { prefix: "auth" });
+      instance.register(mainLocationRoutes, { prefix: "main-location" });
+      instance.register(officeRoutes, { prefix: "office" });
+      instance.register(bodRoutes, { prefix: "bod" });
+      instance.register(caseStudyRoutes, { prefix: "case-study" });
+      instance.register(brochureRoutes, { prefix: "brochure" });
+      instance.register(resourceCategoryRoutes, { prefix: "resource-category" });
+      instance.register(sliderRoutes, { prefix: "slider" });
+      instance.register(pageRoutes, { prefix: "page" });
+      instance.register(templateRoutes, { prefix: "template" });
+      instance.register(partnerAndAllianceRoutes, { prefix: "partner-and-alliance" });
+      instance.register(contactRoutes, { prefix: "contact" });
+      instance.register(pressReleaseRoutes, { prefix: "press-release" });
+      instance.register(jobCategoryRoutes, { prefix: "job-category" });
+      instance.register(jobRoutes, { prefix: "job" });
+      instance.register(applicationRoutes, { prefix: "application" });
+      instance.register(annualReportRoutes, { prefix: "annual-report" });
+      instance.register(financialInfoRoutes, { prefix: "financial-info" });
+      instance.register(policyRoutes, { prefix: "policy" });
+      instance.register(noticeRoutes, { prefix: "notice" });
+      instance.register(committeeRoutes, { prefix: "committee" });
+      instance.register(stockExchangeFilingRoutes, { prefix: "stock-exchange-filing" });
+      instance.register(pdfRoutes, { prefix: "pdf" });
+      instance.register(pdfWithTitleRoutes, { prefix: "pdf-with-title" });
+      instance.register(shareHoldingPatternRoutes, { prefix: "share-holding-pattern" });
+      instance.register(postalBallotRoutes, { prefix: "postal-ballot" });
+      instance.register(subsidiariesFinancialRoutes, { prefix: "subsidiaries-financial" });
+      instance.register(investorFeedbackRoutes, { prefix: "investor-feedback" });
+      instance.register(buyBackRoutes, { prefix: "buy-back" });
+      instance.register(tradingWindowRoutes, { prefix: "trading-window" });
+      instance.register(cacheRoutes, { prefix: "cache" });
+    };
+
+    // ============================ PUBLIC ROUTES (WITH SCOPED MULTIPART LIMIT) ============================
+    const registerPublicRoutes = async (instance: FastifyInstance) => {
+      if (process.env.NODE_ENV === "production") {
+        instance.register(fastifyRateLimit, { max: 10, timeWindow: "1 second" });
+        instance.register(fastifyRateLimit, { max: 50, timeWindow: "1 minute" });
+      }
+      // Normal public routes
+      instance.register(publicRoutes);
+    };
+
+    await app.register(registerProtectedRoutes, { prefix: "/api" });
+    await app.register(registerPublicRoutes, { prefix: "/api/public" });
+  } catch (err) {
+    console.error(err);
+  }
+};

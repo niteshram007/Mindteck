@@ -1,0 +1,554 @@
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_DOMAIN?.startsWith("http")
+    ? process.env.NEXT_PUBLIC_DOMAIN
+    : `https://${process.env.NEXT_PUBLIC_DOMAIN || "www.mindteck.com"}`
+).replace(/\/+$/, "");
+
+const stripHtml = (value = "") =>
+  String(value || "").replace(/<[^>]*>/g, " ");
+
+export const normalizeMetadataText = (value = "") =>
+  stripHtml(value)
+    .replace(/\s+/g, " ")
+    .replace(/\s([,.;:!?])/g, "$1")
+    .trim();
+
+const normalizeKeywords = (value = "") =>
+  normalizeMetadataText(value).replace(/\s*,\s*/g, ", ");
+
+const toCanonicalPath = (value = "/") => {
+  const normalizedValue = String(value || "").trim();
+  if (!normalizedValue) {
+    return "/";
+  }
+
+  if (/^https?:\/\//i.test(normalizedValue)) {
+    const withoutOrigin = normalizedValue.replace(SITE_URL, "");
+    return withoutOrigin.startsWith("/") ? withoutOrigin : `/${withoutOrigin}`;
+  }
+
+  return normalizedValue.startsWith("/") ? normalizedValue : `/${normalizedValue}`;
+};
+
+export const extractSummary = (value = "", maxLength = 160) => {
+  const normalizedValue = normalizeMetadataText(value);
+  if (!normalizedValue) {
+    return "";
+  }
+
+  if (normalizedValue.length <= maxLength) {
+    return normalizedValue;
+  }
+
+  const clippedValue = normalizedValue.slice(0, maxLength + 1);
+  const lastSpaceIndex = clippedValue.lastIndexOf(" ");
+  const summary =
+    lastSpaceIndex > Math.floor(maxLength * 0.6)
+      ? clippedValue.slice(0, lastSpaceIndex)
+      : clippedValue.slice(0, maxLength);
+
+  return `${summary.trim()}...`;
+};
+
+export const buildPageMetadata = ({
+  title,
+  description,
+  keywords,
+  canonicalPath,
+  openGraphType = "website",
+  image,
+}) => {
+  const normalizedTitle = normalizeMetadataText(title);
+  const normalizedDescription = normalizeMetadataText(description);
+  const normalizedKeywords = normalizeKeywords(keywords);
+  const canonical = toCanonicalPath(canonicalPath);
+  const canonicalUrl = new URL(canonical, `${SITE_URL}/`).toString();
+  const resolvedTitle = normalizedTitle ? `${normalizedTitle} | Mindteck` : "Mindteck";
+
+  const metadata = {
+    title: resolvedTitle,
+    description: normalizedDescription,
+    metadataBase: new URL(SITE_URL),
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: resolvedTitle,
+      description: normalizedDescription,
+      url: canonicalUrl,
+      siteName: "Mindteck",
+      locale: "en_US",
+      type: openGraphType,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: resolvedTitle,
+      description: normalizedDescription,
+    },
+  };
+
+  if (normalizedKeywords) {
+    metadata.keywords = normalizedKeywords;
+  }
+
+  if (image) {
+    metadata.openGraph.images = [image];
+  }
+
+  return metadata;
+};
+
+const STATIC_PAGE_METADATA = {
+  "/medical-device-and-healthcare": {
+    title: "Medical Devices and Healthcare",
+    description:
+      "Discover Mindteck's medical device and healthcare engineering services for connected care, interoperability, compliance, cybersecurity, and digital health innovation.",
+    keywords:
+      "healthcare IT, medical product development, medical devices, medical cybersecurity, digital health, connected care, healthcare interoperability, medical regulatory, verification and validation, medical device safety",
+    canonicalPath: "/medical-device-and-healthcare",
+  },
+  "/energy-and-utility": {
+    title: "Energy and Utility",
+    description:
+      "Discover Mindteck's energy and utility engineering solutions for smart metering, grid modernization, asset performance, and sustainable operations.",
+    keywords:
+      "Energy Utilities, Advanced Metering Infrastructure, Grid Modernization, EV Charger Solutions, Asset Management, Energy Management Systems, Building Automation, Embedded Systems Design, HVAC & Lighting Control, Predictive Maintenance, Integrated Security, Energy Dashboards, AI, Peak Load Management, Forecasting",
+    canonicalPath: "/energy-and-utility",
+  },
+  "/industrial-automation-solutions": {
+    title: "Manufacturing and Industrial Automation",
+    description:
+      "Discover Mindteck's manufacturing and industrial automation solutions for integration, software engineering, validation, and smarter plant operations.",
+    keywords:
+      "Product Design and Engineering, System Integration and Validation, Industrial Communication and Protocols, Software and Firmware Development, Instrumentation & Compliance, Field Support",
+    canonicalPath: "/industrial-automation-solutions",
+  },
+  "/life-science-it-solutions-and-analytical-instruments": {
+    title: "Life Sciences and Analytical Instruments",
+    description:
+      "Discover Mindteck's life sciences and analytical instrument solutions for lab software, validation, diagnostics, and connected research workflows.",
+    keywords:
+      "Life Sciences, Analytical Instruments, Instrument Driver Development, Instrument Control Software, Lab Informatics, Liquid Chromatography solutions, Mass Spectroscopy solutions, LC MS systems, Prep LC",
+    canonicalPath: "/life-science-it-solutions-and-analytical-instruments",
+  },
+  "/electronics-semiconductor-and-storage": {
+    title: "Semiconductor",
+    description:
+      "Discover Mindteck's semiconductor engineering services for product development, sustenance, testing, support, and equipment software modernization.",
+    keywords:
+      "Semiconductor, SECS/GEM, Factory Automation, MOCVD, ALD, PVD, Etching, Lithography, LLM (Large Language Model), ML (Machine Learning), AI (Artificial Intelligence), NLP (Natural Language Processing), Generative AI, Data Governance, Data Lake, Data Streaming",
+    canonicalPath: "/electronics-semiconductor-and-storage",
+  },
+  "/data-storage": {
+    title: "Storage",
+    description:
+      "Discover Mindteck's storage engineering services for platform development, validation, AI-ready infrastructure, and modern data management.",
+    keywords:
+      "Hyperconverged Infrastructure (HCI), Enterprise/Datacenter Storage Platforms, Storage Data Management Software, Flash Storage Platforms and Testing, End-to-End Storage Platform Development & Validation, AI Enabled Infrastructure, AI-Driven Storage Optimization, Intelligent Data Tiering (Hot/Warm/Cold), Autonomous Storage Systems, Predictive Storage Analytics, Storage for AI/ML Workloads, Data Lake Storage, Data Lakehouse Architecture, Metadata-Driven Storage, Data Intelligence Platforms",
+    canonicalPath: "/data-storage",
+  },
+  "/ai-ml-services": {
+    title: "AI/ML Services",
+    description:
+      "Discover Mindteck's AI and ML services for intelligent automation, predictive analytics, applied AI, and enterprise transformation.",
+    keywords:
+      "AI ML services, artificial intelligence solutions, machine learning consulting, enterprise AI, predictive analytics, intelligent automation, data science services, AI development company, Mindteck AI",
+    canonicalPath: "/ai-ml-services",
+  },
+  "/internet-of-things": {
+    title: "Internet of Things",
+    description:
+      "Discover Mindteck's Internet of Things services for smart metering, connected devices, energy management, and scalable IoT platforms.",
+    keywords:
+      "wireless and IoT, smart energy management solutions, smart metering solutions, smart grid services, building automation",
+    canonicalPath: "/internet-of-things",
+  },
+  "/bpm-services": {
+    title: "Business Process Management",
+    description:
+      "Discover Mindteck's business process management services for streamlined operations, lower costs, and better outcomes across regulated industries.",
+    keywords:
+      "BPM services, business process management, BPM consulting, process optimization, intelligent BPM, insurance BPM services, healthcare BPM, financial services BPM, Mindteck BPM",
+    canonicalPath: "/bpm-services",
+  },
+  "/electronic-design-services-embedded-systems-and-applications": {
+    title: "Electronic Design Services",
+    description:
+      "Discover Mindteck's electronic design services for embedded hardware, software, FPGA, and end-to-end product lifecycle engineering.",
+    keywords:
+      "Electronic design services, independent verification and validation, embedded design services, embedded verification and validation services, hardware design services, embedded software services, FPGA design services",
+    canonicalPath: "/electronic-design-services-embedded-systems-and-applications",
+  },
+  "/cloud-service": {
+    title: "Cloud",
+    description:
+      "Discover Mindteck's cloud services for migration, cloud-native engineering, secure operations, and cost-optimized infrastructure modernization.",
+    keywords:
+      "cloud services, cloud consulting, cloud migration services, cloud-native engineering, hybrid cloud solutions, multi-cloud services, cloud data management, Mindteck cloud",
+    canonicalPath: "/cloud-service",
+  },
+  "/data-engineering": {
+    title: "Data Engineering and Business Intelligence",
+    description:
+      "Discover Mindteck's data engineering and business intelligence services for modern data platforms, pipelines, analytics, and enterprise reporting.",
+    keywords:
+      "data engineering services, data pipeline development, data platforms, data analytics services, business intelligence solutions, data modernization, big data engineering",
+    canonicalPath: "/data-engineering",
+  },
+  "/digital-transformation": {
+    title: "Digital Transformation and Modernisation",
+    description:
+      "Discover Mindteck's digital transformation services for modernization, agility, and growth through cloud, data, and AI-led change.",
+    keywords:
+      "digital transformation services, enterprise digital transformation, business transformation consulting, IT modernization, cloud transformation, data-driven transformation, AI-led transformation",
+    canonicalPath: "/digital-transformation",
+  },
+  "/it-infrastructure-and-data-centre-transformation": {
+    title: "IT Infrastructure and Data Centre Transformation",
+    description:
+      "Discover Mindteck's IT infrastructure and data centre transformation services for modernization, resilience, performance, and lower operating costs.",
+    keywords:
+      "IT infrastructure transformation, data centre transformation services, data center modernization, IT infrastructure services, enterprise infrastructure optimization, hybrid infrastructure, data centre consulting, Mindteck IT services",
+    canonicalPath: "/it-infrastructure-and-data-centre-transformation",
+  },
+  "/iv-and-v": {
+    title: "IV & V",
+    description:
+      "Discover Mindteck's IV and V services for quality engineering, test automation, compliance, security testing, and reliable product releases.",
+    keywords:
+      "IV&V services, Quality engineering, Software testing services, Test automation, Performance testing, Security testing (VAPT), Compliance testing, UAT Support",
+    canonicalPath: "/iv-and-v",
+  },
+  "/talent": {
+    title: "Talent",
+    description:
+      "Discover Mindteck's talent services for flexible staffing, augmentation, and specialized engineering teams that scale delivery faster.",
+    keywords:
+      "talent services, IT staffing solutions, talent augmentation, workforce solutions, technology staffing, contract staffing, managed talent services, Mindteck talent",
+    canonicalPath: "/talent",
+  },
+  "/ai-ml-solutions": {
+    title: "AI/ML Solutions",
+    description:
+      "Explore Mindteck AI and ML solutions for intelligent automation, advanced analytics, and enterprise-ready business outcomes.",
+    keywords:
+      "AI ML solutions, artificial intelligence solutions, machine learning solutions, enterprise AI solutions, intelligent automation, AI analytics, applied AI, Mindteck AI solutions",
+    canonicalPath: "/ai-ml-solutions",
+  },
+  "/asset-tracking": {
+    title: "Asset Tracking",
+    description:
+      "Explore Mindteck asset tracking solutions for real-time visibility, monitoring, utilization, and analytics across connected operations.",
+    keywords:
+      "asset tracking solutions, IoT asset tracking, real-time asset tracking, asset monitoring systems, smart asset management, industrial asset tracking, IoT solutions",
+    canonicalPath: "/asset-tracking",
+  },
+  "/fleet-management": {
+    title: "Fleet Management",
+    description:
+      "Explore Mindteck fleet management solutions for connected vehicle tracking, telematics, safety, and operational efficiency.",
+    keywords:
+      "fleet management solutions, fleet tracking systems, vehicle tracking, IoT fleet management, telematics solutions, fleet analytics, transportation management",
+    canonicalPath: "/fleet-management",
+  },
+  "/productivity-improvement": {
+    title: "Productivity Improvement",
+    description:
+      "Explore Mindteck productivity improvement solutions that connect teams, streamline workflows, and improve operational performance.",
+    keywords:
+      "productivity improvement solutions, business productivity services, process optimization, operational efficiency, productivity enhancement, digital productivity, enterprise optimization",
+    canonicalPath: "/productivity-improvement",
+  },
+  "/ctc-framework": {
+    title: "Cluster Tool Controller Framework",
+    description:
+      "Explore Mindteck's CTC Framework for building, testing, and commercializing connected solutions with faster time-to-market.",
+    keywords:
+      "CTC framework, connect test commercialize, connected solutions framework, IoT framework, solution lifecycle framework, innovation framework, digital solutions deployment",
+    canonicalPath: "/ctc-framework",
+  },
+  "/equipment-data-acquisition": {
+    title: "Equipment Data Acquisition",
+    description:
+      "Explore Mindteck equipment data acquisition solutions for real-time machine visibility, analytics, and smarter industrial operations.",
+    keywords:
+      "equipment data acquisition, machine data acquisition, industrial data collection, real-time equipment monitoring, IoT data acquisition, manufacturing analytics, operational visibility",
+    canonicalPath: "/equipment-data-acquisition",
+  },
+  "/factory-host": {
+    title: "Factory Host",
+    description:
+      "Explore Mindteck Factory Host solutions for semiconductor automation, equipment integration, diagnostics, and reliable process control.",
+    keywords:
+      "factory host, semiconductor factory automation, SECS/GEM host, host communication, equipment integration, process control, semiconductor manufacturing, factory automation software, equipment simulator, Mindteck Factory Host",
+    canonicalPath: "/factory-host",
+  },
+  "/recipe-management-system": {
+    title: "Recipe Management System (RMS)",
+    description:
+      "Explore Mindteck's Recipe Management System for controlled semiconductor recipe creation, validation, governance, and distributed access.",
+    keywords:
+      "recipe management system, semiconductor RMS, recipe creation modification, SEMI standards, WPF C# MVVM, SQL Server Entity Framework, golden recipes, recipe validation, distributed recipe management",
+    canonicalPath: "/recipe-management-system",
+  },
+  "/who-we-are": {
+    title: "Who We Are",
+    description:
+      "Discover Mindteck -- a global engineering and technology solutions company with 30+ years of expertise across AI/ML, IoT, embedded systems, and product engineering.",
+    keywords:
+      "about Mindteck, engineering company, technology solutions, global delivery, company overview, digital engineering partner",
+    canonicalPath: "/who-we-are",
+  },
+  "/board-of-directors": {
+    title: "Board of Directors",
+    description:
+      "Meet Mindteck's Board of Directors and learn about the strategic leadership guiding the company.",
+    keywords:
+      "Mindteck board of directors, corporate leadership, governance, executive leadership, company directors",
+    canonicalPath: "/board-of-directors",
+  },
+  "/management-team": {
+    title: "Management Team",
+    description:
+      "Explore Mindteck's management team and the leaders driving execution, innovation, and business growth.",
+    keywords:
+      "Mindteck management team, company leadership, executive team, technology leadership, business leadership",
+    canonicalPath: "/management-team",
+  },
+  "/practice-team": {
+    title: "Practice Team",
+    description:
+      "Meet Mindteck's practice team and domain leaders across engineering, data, AI, and digital transformation.",
+    keywords:
+      "Mindteck practice team, domain leadership, engineering leaders, AI leadership, technology experts",
+    canonicalPath: "/practice-team",
+  },
+  "/sales-team": {
+    title: "Sales Team",
+    description:
+      "Connect with Mindteck's sales team and regional leaders supporting enterprise engineering and technology engagements.",
+    keywords:
+      "Mindteck sales team, business development, regional sales leaders, enterprise technology consulting",
+    canonicalPath: "/sales-team",
+  },
+  "/partners-and-alliances": {
+    title: "Partners and Alliances",
+    description:
+      "Discover Mindteck's partner ecosystem and alliances that help deliver scalable engineering and digital solutions.",
+    keywords:
+      "Mindteck partners, technology alliances, strategic partners, ecosystem partnerships",
+    canonicalPath: "/partners-and-alliances",
+  },
+  "/research-collaboration": {
+    title: "Research Collaboration",
+    description:
+      "Explore Mindteck's research collaborations and innovation initiatives across advanced engineering and technology domains.",
+    keywords:
+      "Mindteck research collaboration, innovation partnerships, engineering research, technology collaboration",
+    canonicalPath: "/research-collaboration",
+  },
+  "/quality": {
+    title: "Quality",
+    description:
+      "Learn how Mindteck's quality systems, engineering rigor, and continuous improvement practices support reliable delivery.",
+    keywords:
+      "Mindteck quality, engineering quality, process excellence, quality management, delivery excellence",
+    canonicalPath: "/quality",
+  },
+  "/csr": {
+    title: "Corporate Social Responsibility",
+    description:
+      "Explore Mindteck's CSR initiatives and community impact programs focused on responsible and inclusive growth.",
+    keywords:
+      "Mindteck CSR, corporate social responsibility, community initiatives, sustainability, social impact",
+    canonicalPath: "/csr",
+  },
+  "/contact": {
+    title: "Contact",
+    description:
+      "Contact Mindteck offices worldwide for engineering services, partnerships, investor relations, and business inquiries.",
+    keywords:
+      "contact Mindteck, global offices, engineering services contact, business inquiry, investor relations contact",
+    canonicalPath: "/contact",
+  },
+  "/resources": {
+    title: "Resources",
+    description:
+      "Explore Mindteck case studies, white papers, and success stories across AI, IoT, product engineering, and enterprise transformation.",
+    keywords:
+      "Mindteck resources, case studies, white papers, success stories, AI resources, IoT resources",
+    canonicalPath: "/resources",
+  },
+  "/book-a-call": {
+    title: "Book a Call",
+    description:
+      "Book a call with Mindteck to discuss engineering, AI, IoT, data, and digital transformation initiatives.",
+    keywords:
+      "book a call, contact Mindteck, schedule consultation, engineering services consultation",
+    canonicalPath: "/book-a-call",
+  },
+  "/investors": {
+    title: "Investors",
+    description:
+      "Access Mindteck investor relations resources including financial reports, governance documents, filings, notices, and shareholder information.",
+    keywords:
+      "Mindteck investors, investor relations, annual reports, corporate governance, shareholder information, stock exchange filings",
+    canonicalPath: "/investors",
+  },
+  "/investors/press-room": {
+    title: "Press Room",
+    description:
+      "The page covers press releases, media events, corporate deals and product launches that shape the course of Mindteck.",
+    keywords: "Mindteck press releases, reports, news, media, events",
+    canonicalPath: "/investors/press-room",
+  },
+  "/investors/annual-report": {
+    title: "Annual Report",
+    description:
+      "Browse Mindteck annual reports by financial year and access the latest published investor documents.",
+    keywords:
+      "Mindteck annual report, investor annual reports, financial year reports, investor documents",
+    canonicalPath: "/investors/annual-report",
+  },
+  "/investors/buy-back": {
+    title: "Buy Back",
+    description:
+      "Access Mindteck buy back related investor documents, filings, and disclosures.",
+    keywords:
+      "Mindteck buy back, investor disclosures, share buy back, shareholder documents",
+    canonicalPath: "/investors/buy-back",
+  },
+  "/investors/committees": {
+    title: "Committees",
+    description:
+      "Review Mindteck board committees, governance information, and committee-related investor documents.",
+    keywords:
+      "Mindteck committees, board committees, governance, investor committees",
+    canonicalPath: "/investors/committees",
+  },
+  "/investors/financial-information": {
+    title: "Financial Information",
+    description:
+      "Access Mindteck quarterly and annual financial information, statements, and investor updates.",
+    keywords:
+      "Mindteck financial information, quarterly results, investor financials, financial statements",
+    canonicalPath: "/investors/financial-information",
+  },
+  "/investors/notices": {
+    title: "Notices",
+    description:
+      "Browse Mindteck investor notices, meeting updates, and shareholder communications.",
+    keywords:
+      "Mindteck notices, investor notices, shareholder communications, meeting notices",
+    canonicalPath: "/investors/notices",
+  },
+  "/investors/policies": {
+    title: "Policies",
+    description:
+      "Review Mindteck corporate policies, governance policies, and investor-facing compliance documents.",
+    keywords:
+      "Mindteck policies, corporate policies, governance policies, compliance documents",
+    canonicalPath: "/investors/policies",
+  },
+  "/investors/postal-ballot": {
+    title: "Postal Ballot",
+    description:
+      "Access Mindteck postal ballot documents, notices, and related shareholder disclosures.",
+    keywords:
+      "Mindteck postal ballot, shareholder ballot, investor disclosures, voting documents",
+    canonicalPath: "/investors/postal-ballot",
+  },
+  "/investors/redressal-through-common-odr-portal": {
+    title: "Redressal Through Common ODR Portal",
+    description:
+      "Find Mindteck investor information related to grievance redressal through the common ODR portal.",
+    keywords:
+      "Mindteck ODR portal, investor grievance redressal, common ODR portal, investor support",
+    canonicalPath: "/investors/redressal-through-common-odr-portal",
+  },
+  "/investors/shareholding-pattern": {
+    title: "Shareholding Pattern",
+    description:
+      "Access Mindteck shareholding pattern disclosures and shareholder composition documents.",
+    keywords:
+      "Mindteck shareholding pattern, shareholder structure, investor disclosures, shareholding documents",
+    canonicalPath: "/investors/shareholding-pattern",
+  },
+  "/investors/stock-exchange-filings": {
+    title: "Stock Exchange Filings",
+    description:
+      "Browse Mindteck stock exchange filings, compliance submissions, and regulatory disclosures.",
+    keywords:
+      "Mindteck stock exchange filings, regulatory filings, compliance disclosures, investor filings",
+    canonicalPath: "/investors/stock-exchange-filings",
+  },
+  "/investors/subsidiaries-financials": {
+    title: "Subsidiaries Financials",
+    description:
+      "Access Mindteck subsidiaries financial statements and supporting investor documents.",
+    keywords:
+      "Mindteck subsidiaries financials, subsidiary statements, investor financial documents",
+    canonicalPath: "/investors/subsidiaries-financials",
+  },
+  "/white-paper/AI-driven-Fault-Inspection": {
+    title: "AI-Driven Fault Inspection White Paper",
+    description:
+      "Download Mindteck's AI-driven fault inspection white paper and explore practical approaches to automated quality control.",
+    keywords:
+      "AI-driven fault inspection, white paper, automated quality control, computer vision, manufacturing AI",
+    canonicalPath: "/white-paper/AI-driven-Fault-Inspection",
+  },
+  "/privacypolicy": {
+    title: "Privacy Policy",
+    description:
+      "Read Mindteck's Privacy Policy to learn how we collect, use, store, protect, and share personal information across our websites and services.",
+    keywords:
+      "Mindteck privacy policy, data privacy, personal information, privacy notice",
+    canonicalPath: "/privacypolicy",
+  },
+  "/terms-of-use": {
+    title: "Terms of Use",
+    description:
+      "Read Mindteck's Terms of Use for website access, content usage, legal notices, and user responsibilities.",
+    keywords:
+      "Mindteck terms of use, legal notice, website usage terms, user responsibilities",
+    canonicalPath: "/terms-of-use",
+  },
+  "/disclaimer": {
+    title: "Terms of Use",
+    description:
+      "Read Mindteck's Terms of Use for website access, content usage, legal notices, and user responsibilities.",
+    keywords:
+      "Mindteck terms of use, legal notice, website usage terms, user responsibilities",
+    canonicalPath: "/terms-of-use",
+  },
+  "/unsubscribe": {
+    title: "Unsubscribe",
+    description:
+      "Unsubscribe from Mindteck marketing alerts and updates.",
+    keywords:
+      "Mindteck unsubscribe, mailing list preferences, marketing opt out",
+    canonicalPath: "/unsubscribe",
+  },
+  "/Sitemap": {
+    title: "Sitemap",
+    description:
+      "Browse the Mindteck sitemap to quickly find company pages, services, solutions, industries, resources, and investor information.",
+    keywords:
+      "Mindteck sitemap, website index, public pages, investor resources, services, solutions",
+    canonicalPath: "/Sitemap",
+  },
+};
+
+export const getStaticPageMetadata = (path) => {
+  const metadata = STATIC_PAGE_METADATA[path];
+  if (!metadata) {
+    return buildPageMetadata({
+      title: "Mindteck",
+      description: "Mindteck",
+      canonicalPath: path || "/",
+    });
+  }
+
+  return buildPageMetadata(metadata);
+};

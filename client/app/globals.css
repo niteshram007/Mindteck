@@ -1,0 +1,351 @@
+
+@font-face {
+  font-family: 'athelas'; /* Name the font */
+  src: url('fonts/Athelas-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'athelas';
+  src: url('fonts/Athelas-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'athelas';
+  src: url('fonts/Athelas-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'athelas';
+  src: url('fonts/Athelas-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html{
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-inter);
+  overflow-x: hidden;
+ 
+  
+}
+main {
+  flex-grow: 1;
+  overflow-y: auto; /* Allow scrolling if content overflows vertically */
+  padding-bottom: 20px; /* Optional, to add space at the bottom */
+}
+
+.loading-wave {
+  width: 300px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.loading-bar {
+  width: 20px;
+  height: 10px;
+  margin: 0 5px;
+  background-color: hsl(var(--primary));
+  border-radius: 5px;
+  animation: loading-wave-animation 1s ease-in-out infinite;
+}
+
+.loading-bar:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.loading-bar:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.loading-bar:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+@keyframes loading-wave-animation {
+  0% {
+    height: 10px;
+  }
+
+  50% {
+    height: 50px;
+  }
+
+  100% {
+    height: 10px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .top-menu li {
+    @apply border-secondary border-r-2 px-1.5;
+  }
+  .top-menu li:nth-last-child(1) {
+    @apply border-none border-r-0;
+  }
+  .text-md {
+    font-size: 0.875rem /* 14px */;
+    line-height: 22px /* 20px */;
+  }
+
+  
+}
+
+@layer base {
+  :root {
+    /* --font-inter: "Inter", sans-serif;
+    --font-roboto: "Roboto", sans-serif; */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 161, 100%, 10%, 1;
+    --tertiary:76.8deg 73.96% 66.86%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 43, 26%, 41%, 1;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --footer-foreground: 161 100% 14%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent:0deg 0% 99.93% / 35%;
+    --sidebar-accent-foreground: 0deg 0% 99.15%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --banner-bg-color: 45deg 40% 96.08%;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --tertiary:76.8deg 73.96% 66.86%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --footer-foreground: 161 100% 14%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --banner-bg-color: 45deg 40% 96.08%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.galaxy-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.success-story-title,
+.success-story-container h3 {
+  min-height: 56px;
+  max-height: 56px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.grecaptcha-badge {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.header-banner > div > div:first-child h1,
+.header-banner > div > div:first-child .ProseMirror h1,
+.header-banner > div > div:first-child .ProseMirror h2,
+.header-banner > div > div:first-child .ProseMirror h3 {
+  margin: 0;
+  font-family: athelas, serif !important;
+  font-size: 1.5rem !important;
+  line-height: 1.75rem !important;
+  font-weight: 400 !important;
+  color: #fff !important;
+}
+
+.header-banner > div > div:first-child p,
+.header-banner > div > div:first-child .ProseMirror p {
+  margin: 0;
+  font-size: 0.875rem !important;
+  line-height: 1.375rem !important;
+  color: #fff !important;
+}
+
+section.success-story > .container.text-left.mb-10 {
+  display: block !important;
+  position: relative;
+  z-index: 0;
+  max-width: 1080px;
+}
+
+section.success-story > .container.text-left.mb-10 > div {
+  position: relative;
+  z-index: 0;
+  max-width: 980px;
+  margin-inline: auto;
+  border-radius: 1.25rem !important;
+  align-items: stretch;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+section.success-story > .container.text-left.mb-10 > div > :first-child {
+  width: 100%;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+section.success-story > .container.text-left.mb-10 > div > :first-child h2 {
+  margin-bottom: 0.875rem;
+  line-height: 1.25;
+}
+
+section.success-story > .container.text-left.mb-10 > div > :first-child p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+section.success-story > .container.text-left.mb-10 > div > :last-child {
+  width: 100%;
+  position: relative !important;
+  right: auto !important;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  min-height: 200px;
+}
+
+section.success-story > .container.text-left.mb-10 > div > :last-child::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.92) 18%,
+    rgba(255, 255, 255, 0.5) 42%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+section.success-story
+  > .container.text-left.mb-10
+  > div
+  > :last-child
+  img[alt="Smart Connections"] {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (min-width: 768px) {
+  section.success-story > .container.text-left.mb-10 > div > :first-child {
+    width: 60% !important;
+    padding: 1.5rem 1.85rem;
+  }
+
+  section.success-story > .container.text-left.mb-10 > div > :last-child {
+    width: 40% !important;
+    min-height: auto;
+  }
+}
+
+section#SmartUtilities .my-custom-class,
+section#SmartUtilities h1,
+section#SmartUtilities h2,
+section#SmartUtilities h3,
+section#SmartUtilities strong,
+section#SmartUtilities b {
+  font-weight: 400 !important;
+}
+
+/* Keep Connect/secondary CTAs visually stable on hover */
+button.bg-secondary:hover,
+a.bg-secondary:hover {
+  background-color: hsl(var(--secondary)) !important;
+  color: #ffffff !important;
+}
