@@ -321,11 +321,6 @@ const relabelMenuItems = (items = []) =>
         normalizedLabel === "about us"
           ? ensureAboutUsChildren(children, {
               resolveUrl: (value) => normalizeMenuPath(value || "", cms_domain).toLowerCase(),
-              createItem: () => ({
-                label: "Sales Team",
-                url: "/sales-team",
-                children: [],
-              }),
             })
           : normalizedLabel === "services" || normalizedLabel === "service"
           ? ensureServicesChildren(children)

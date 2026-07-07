@@ -285,11 +285,6 @@ export default async function Footer() {
       sectionLabelKey === "about us"
         ? ensureAboutUsChildren(section?._children || [], {
             resolveUrl: (value) => resolveFooterLink("", value).toLowerCase(),
-            createItem: () => ({
-              label: "Sales Team",
-              url: "/sales-team",
-              children: [],
-            }),
           })
         : Array.isArray(section?._children)
           ? section._children.filter(Boolean)

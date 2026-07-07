@@ -62,13 +62,12 @@ const mapLeadershipRoutes = async (category, basePath) => {
 };
 
 export default async function sitemap() {
-  const [pressRoomRoutes, boardRoutes, managementRoutes, practiceRoutes, salesRoutes] =
+  const [pressRoomRoutes, boardRoutes, managementRoutes, practiceRoutes] =
     await Promise.all([
       mapPressRoomRoutes(),
       mapLeadershipRoutes("Board of Director", "/board-of-directors"),
       mapLeadershipRoutes("Management Team", "/management-team"),
       mapLeadershipRoutes("Practice Team", "/practice-team"),
-      mapLeadershipRoutes("Sales Team", "/sales-team"),
     ]);
 
   return [
@@ -77,6 +76,5 @@ export default async function sitemap() {
     ...boardRoutes,
     ...managementRoutes,
     ...practiceRoutes,
-    ...salesRoutes,
   ];
 }

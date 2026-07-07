@@ -66,7 +66,6 @@ export const PUBLIC_SITE_ROUTES = dedupeSitePaths([
   "/board-of-directors",
   "/management-team",
   "/practice-team",
-  "/sales-team",
   "/partners-and-alliances",
   "/research-collaboration",
   "/quality",

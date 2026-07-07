@@ -38,15 +38,6 @@ export default function BODTabs({ activeTab }) {
         >
           Practice Team
         </Link>
-        <Link
-          scroll={false}
-          className={`px-4 py-3 rounded-tl-[12px] rounded-tr-[12px] w-[251px] text-center font-[500] ${
-            activeTab === "sales-team" ? "bg-primary text-white" : "bg-white text-black"
-          } `}
-          href={"/sales-team"}
-        >
-          Sales Team
-        </Link>
       </div>
       <ScrollBar orientation="horizontal" />
     </ScrollArea>

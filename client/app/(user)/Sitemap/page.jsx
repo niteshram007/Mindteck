@@ -228,10 +228,6 @@ export default async function page() {
       section.key === "about us"
         ? ensureAboutUsChildren(matched?.children || [], {
             resolveUrl: (value) => normalizePath(value || "").toLowerCase(),
-            createItem: () => ({
-              label: "Sales Team",
-              url: "/sales-team",
-            }),
           })
         : matched?.children || [];
 
