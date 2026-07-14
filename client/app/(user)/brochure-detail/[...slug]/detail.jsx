@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import parse from "html-react-parser";
 import { encodeAssetUrl } from "@/app/utils/cmsAssetPath";
 
@@ -26,30 +29,12 @@ const resolveInlineImageSrc = (src = "", fallbackImage = "") => {
   return encodeAssetUrl(normalizedSrc);
 };
 
-const mergeInlineImageStyle = (styleText = "", hasExplicitHeight = false) => {
-  const normalizedStyle = String(styleText || "")
-    .trim()
-    .replace(/\s*;+\s*$/g, "");
-  const hasMaxWidth = /(?:^|;)\s*max-width\s*:/i.test(normalizedStyle);
-  const hasHeight = /(?:^|;)\s*height\s*:/i.test(normalizedStyle);
-  const styleParts = [];
-
-  if (normalizedStyle) {
-    styleParts.push(normalizedStyle);
-  }
-
-  if (!hasMaxWidth) {
-    styleParts.push("max-width:100%");
-  }
-
-  if (!hasHeight && !hasExplicitHeight) {
-    styleParts.push("height:auto");
-  }
-
-  return styleParts.join("; ");
-};
-
-export default function BrochureDetail({ data, fallbackImage = "" }) {
+export default function BrochureDetail({
+  data,
+  fallbackImage = "",
+  categoryTitle = "Brochures",
+}) {
+  const [zoomedImage, setZoomedImage] = useState(null);
   const title = data?.title || "Brochure";
   const description = data?.subTitle || data?.description || "";
   const content = sanitizeBrochureHtml(
@@ -61,7 +46,7 @@ export default function BrochureDetail({ data, fallbackImage = "" }) {
       <div className="md:px-8 sm:px-5 px-4 py-10">
         <div className="border-b-2 pb-3 mb-6">
           <h2 className=" font-normal text-xl text-secondary font-athelas">
-            Brochures
+            {categoryTitle || "Brochures"}
           </h2>
           <h1 className="text-3xl  text-secondary mt-2 font-athelas">{title}</h1>
           <p className="text-black font-normal mt-1 text-xl">{description}</p>
@@ -86,30 +71,50 @@ export default function BrochureDetail({ data, fallbackImage = "" }) {
               const mergedClassName = [
                 attributes.class,
                 attributes.className,
-                "mx-auto my-6 rounded-xl",
+                "mx-auto my-6 rounded-xl cursor-pointer transition-transform hover:scale-[1.01]",
               ]
                 .filter(Boolean)
                 .join(" ");
-              const mergedStyle = mergeInlineImageStyle(
-                attributes.style,
-                Boolean(attributes.height),
+
+              return (
+                <img
+                  {...attributes}
+                  src={resolvedSrc}
+                  alt={attributes.alt || title}
+                  className={mergedClassName}
+                  style={{ ...attributes.style, cursor: "pointer", maxWidth: "100%", height: "auto" }}
+                  loading={attributes.loading || "lazy"}
+                  decoding="async"
+                  onClick={() => setZoomedImage({ src: resolvedSrc, alt: attributes.alt || title })}
+                />
               );
-
-              node.attribs = {
-                ...attributes,
-                src: resolvedSrc,
-                alt: attributes.alt || title,
-                class: mergedClassName,
-                style: mergedStyle,
-                loading: attributes.loading || "lazy",
-                decoding: "async",
-              };
-
-              return undefined;
             },
           })}
         </div>
       </div>
+
+      {zoomedImage && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 transition-opacity"
+          onClick={() => setZoomedImage(null)}
+        >
+          <div className="relative max-h-[90vh] max-w-[90vw]">
+            <button
+              type="button"
+              className="absolute -top-10 right-0 rounded-full bg-white/20 px-3 py-1 text-white hover:bg-white/40 font-semibold"
+              onClick={() => setZoomedImage(null)}
+            >
+              Close ✕
+            </button>
+            <img
+              src={zoomedImage.src}
+              alt={zoomedImage.alt}
+              className="max-h-[85vh] max-w-[85vw] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

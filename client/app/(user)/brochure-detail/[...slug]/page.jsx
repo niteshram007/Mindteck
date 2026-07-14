@@ -79,6 +79,35 @@ const getBrochureByTitle = cache(async (brochureTitle) => {
   }
 });
 
+const getCategoryTitleById = cache(async (categoryId) => {
+  if (!categoryId) return "Brochures";
+  try {
+    const response = await fetch(
+      new URL("public/resource-category/getallActive", API_BASE_URL),
+      {
+        next: { revalidate },
+      },
+    );
+
+    if (!response.ok) {
+      return "Brochures";
+    }
+
+    const categories = await response.json();
+    if (Array.isArray(categories)) {
+      const match = categories.find(
+        (cat) => String(cat?._id || cat?.id) === String(categoryId),
+      );
+      if (match?.title) {
+        return match.title.trim();
+      }
+    }
+  } catch (_error) {
+    // fallback
+  }
+  return "Brochures";
+});
+
 export async function generateMetadata({ params }) {
   const brochureTitle = getBrochureTitleFromParams(params);
   const data = await getBrochureByTitle(brochureTitle);
@@ -115,6 +144,11 @@ export default async function BrochureDetails({ params }) {
   if (!data || !isResourceActive(data?.isActive)) {
     notFound();
   }
+
+  const categoryTitle =
+    data?.resourceCategory?.title ||
+    (await getCategoryTitleById(data?.resourceCategoryId)) ||
+    "Brochures";
 
   const bannerImageBase = data?.file?.filePath
     ? buildUploadedAssetUrl(data.file.filePath)
@@ -156,7 +190,11 @@ export default async function BrochureDetails({ params }) {
         </div>
       </section>
 
-      <BrochureDetail data={data} fallbackImage={bannerImage} />
+      <BrochureDetail
+        data={data}
+        fallbackImage={bannerImage}
+        categoryTitle={categoryTitle}
+      />
 
       <ContactForm />
     </div>

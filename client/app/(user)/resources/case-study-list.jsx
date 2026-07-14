@@ -359,9 +359,14 @@ export default function CaseStudyList({
                   const isWhitepaperCategory = ["whitepaper", "white paper"].includes(
                     (selectedResource?.title || "").trim().toLowerCase(),
                   );
+                  const normalizedTitle = String(itemTitle || "").trim().toLowerCase();
+                  const isLegacyWaferWhitepaper =
+                    isWhitepaperCategory &&
+                    (normalizedTitle === "ai driven aoi-based wafer defect classification system" ||
+                      normalizedTitle.includes("wafer defect classification"));
                   const detailHref = isCaseStudy
                     ? `/case-study-detail/${encodeURIComponent(itemTitle)}`
-                    : isWhitepaperCategory
+                    : isLegacyWaferWhitepaper
                       ? "/white-paper/AI-driven-Fault-Inspection"
                       : `/brochure-detail/${encodeURIComponent(itemTitle)}`;
 
