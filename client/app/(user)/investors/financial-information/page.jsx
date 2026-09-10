@@ -104,7 +104,7 @@ const sortFinancialSections = (sections = []) =>
         return priorityDiff;
       }
 
-      return String(left?.title || "").localeCompare(String(right?.title || ""));
+      return 0; // Preserve backend top-down insertion order
     });
 
 export default function FinancialInformation() {

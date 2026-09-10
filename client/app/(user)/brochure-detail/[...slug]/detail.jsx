@@ -71,7 +71,7 @@ export default function BrochureDetail({
               const mergedClassName = [
                 attributes.class,
                 attributes.className,
-                "mx-auto my-6 rounded-xl cursor-pointer transition-transform hover:scale-[1.01]",
+                "mx-auto mb-6 mt-2 rounded-xl cursor-pointer transition-transform hover:scale-[1.01]",
               ]
                 .filter(Boolean)
                 .join(" ");

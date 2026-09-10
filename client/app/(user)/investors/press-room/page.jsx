@@ -57,7 +57,7 @@ export default async function page() {
               className="w-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <div className="pt-2 sm:pt-3">
-                {values.map((el) => (
+                {[...values].reverse().map((el) => (
                   <div
                     key={el._id}
                     className="border-b hover:bg-gray-100 transition-colors"

@@ -91,19 +91,27 @@ const uploadEditorImage = async (files, uploadPath = "") => {
   }
 
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("image", file);
+  
+  const moduleName = uploadPath.split("/")[0].replace(/-/g, "_");
+  formData.append("uploadPath", moduleName);
 
-  const { data } = await axiosInstance.post(uploadPath, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  try {
+    const { data } = await axiosInstance.post(uploadPath, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    
+    if (!data?.filePath) {
+      throw new Error("Image upload did not return a file path");
+    }
 
-  if (!data?.filePath) {
-    throw new Error("Image upload did not return a file path");
+    return encodeURI(`${TEMP_IMAGE_PATH}${data.filePath}`);
+  } catch (error) {
+    console.error("Editor image upload failed, falling back to local blob:", error);
+    return createObjectUrlUpload(file);
   }
-
-  return encodeURI(`${TEMP_IMAGE_PATH}${data.filePath}`);
 };
 
 export const getExtensions = ({ imageUploadPath = "" } = {}) => [

@@ -35,7 +35,7 @@ export default function UsJobOpeningsPage({ searchParams }) {
                 }}
               >
                 <div className="flex flex-col h-full justify-center gap-5 text-center">
-                  <h1 className="font-athelas font-bold text-3xl md:text-4xl text-white leading-relaxed">
+                  <h1 className="font-athelas font-normal text-3xl md:text-4xl text-white leading-relaxed">
                     Explore Open Roles in the United States
                   </h1>
                 </div>

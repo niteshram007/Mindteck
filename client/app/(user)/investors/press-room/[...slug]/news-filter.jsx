@@ -49,7 +49,7 @@ export default function NewsFilter({ id, data }) {
         </SelectContent>
       </Select>
       <div className="mt-4">
-        {data[selectedYear]?.map((el) => (
+        {[...(data[selectedYear] || [])].reverse().map((el) => (
           <div
             key={el._id}
             className="mb-3 border-b border-secondary bg-white"

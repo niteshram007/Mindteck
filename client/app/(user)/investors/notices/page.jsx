@@ -100,27 +100,61 @@ export default function Notices() {
       {notices.length > 0 ? (
         <div className="mt-7">
           <p className="text-2xl font-bold mb-3">FY {selectedYear}</p>
-          {notices?.map((item) => (
+          {[...(notices || [])].sort((a, b) => {
+            const hasAgm = (item) => {
+              const h = String(item.heading || "").toLowerCase();
+              if (h.includes("annual general meeting") || h.includes("agm")) return true;
+              if (item.notices?.some(n => {
+                const t = String(n.title || "").toLowerCase();
+                return t.includes("annual general meeting") || t.includes("agm") || n.title?.includes("Notice of 33rd Annual General Meeting");
+              })) return true;
+              return false;
+            };
+            const aAgm = hasAgm(a);
+            const bAgm = hasAgm(b);
+            if (aAgm && !bAgm) return -1;
+            if (!aAgm && bAgm) return 1;
+            return 0;
+          }).map((item) => (
             <div key={item._id} className="mb-10">
               <h4 className="text-xl font-semibold border-b border-gray-500 pb-1.5">
-                {item.heading}
+                {(() => {
+                  const h = String(item.heading || "").trim();
+                  if (h.toLowerCase().includes("33rd annual general meeting")) {
+                    return "Annual General Meeting";
+                  }
+                  return h;
+                })()}
               </h4>
 
-              {item.notices.map((el) => (
-                <p
-                  className="text-xl border-b border-gray-500  flex items-center gap-4 py-1.5"
-                  key={el.title}
-                >
-                  <Square className="fill-[black] rounded-none" size={10} />
-                  <Link
-                    href={buildUploadedAssetUrl(el?.file?.filePath)}
-                    target="_blank"
-                    prefetch={false}
-                  >
-                    {el.title}
-                  </Link>
-                </p>
-              ))}
+              {
+                (() => {
+                  const getNoticeOrder = (title) => {
+                    const t = String(title || "").toLowerCase();
+                    if (t.includes("annual general meeting") || t.includes("agm")) return 1;
+                    return 2;
+                  };
+                
+                  const sorted = [...(item.notices || [])]
+                    .sort((a, b) => getNoticeOrder(a.title) - getNoticeOrder(b.title));
+                
+                  return sorted.map((el) => (
+                    <p
+                      className="text-xl border-b border-gray-500  flex items-center gap-4 py-1.5"
+                      key={el.title}
+                    >
+                      <Square className="fill-[black] rounded-none" size={10} />
+                      <Link
+                        href={buildUploadedAssetUrl(el?.file?.filePath)}
+                        target="_blank"
+                        prefetch={false}
+                      >
+                        {el.title}
+                      </Link>
+                    </p>
+                  ));
+                })()
+              }
             </div>
           ))}
         </div>

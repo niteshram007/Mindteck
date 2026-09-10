@@ -99,45 +99,50 @@ export default function SubsidiariesFinancial() {
           </SelectContent>
         </Select>
       </div>
-      {subsidiariesFinancialData.map((item) => (
-        <div className="grid grid-cols-1 mt-4" key={item._id}>
-          <div className="border border-[#D7D7D7] rounded-xl px-4 py-6 mb-4">
-            <div className="grid grid-cols-12 md:gap-4 gap-2 items-center">
-              <div className="md:col-span-4 col-span-12 text-center">
-                <Image
-                  src={Reportimage}
-                  width={120}
-                  height={120}
-                  className="m-auto w-[50px]"
-                  alt="report"
-                />
-                <p className="text-2xl font-semibold  text-center mt-2">
-                  FY {selectedYear}
-                </p>
-              </div>
-              <div className="md:col-span-8 col-span-12">
-                <div>
-                  {item?.subsidiaries.map((el, subIndex) => (
-                    <Link
-                      href={buildUploadedAssetUrl(el?.file?.filePath)}
-                      target="_blank"
-                      className={`hover:text-primary hover:bg-gray-100 flex items-center text-xl ${
-                        item?.subsidiaries?.length - 1 === subIndex
-                          ? "border-none"
-                          : "border-b border-[#858484] "
-                      } py-1.5`}
-                      key={el.file.filePath}
-                      prefetch={false}
-                    >
-                      {el.subsidiary}
-                    </Link>
-                  ))}
+      {subsidiariesFinancialData.length > 0 ? (
+        subsidiariesFinancialData.map((item) => (
+          <div className="grid grid-cols-1 mt-4" key={item._id}>
+            <div className="border border-[#D7D7D7] rounded-xl px-4 py-6 mb-4">
+              <div className="grid grid-cols-12 md:gap-4 gap-2 items-center">
+                <div className="md:col-span-4 col-span-12 text-center">
+                  <Image
+                    src={Reportimage}
+                    width={120}
+                    height={120}
+                    className="m-auto w-[50px]"
+                    alt="report"
+                  />
+                  <p className="text-2xl font-semibold text-center mt-2">
+                    FY {selectedYear}
+                  </p>
+                </div>
+                <div className="md:col-span-8 col-span-12">
+                  <div>
+                    {Array.isArray(item?.subsidiaries) &&
+                      item.subsidiaries.map((el, subIndex) => (
+                        <Link
+                          href={buildUploadedAssetUrl(el?.file?.filePath)}
+                          target="_blank"
+                          className={`hover:text-primary hover:bg-gray-100 flex items-center text-xl ${
+                            item?.subsidiaries?.length - 1 === subIndex
+                              ? "border-none"
+                              : "border-b border-[#858484] "
+                          } py-1.5`}
+                          key={el?.file?.filePath || el?.subsidiary || subIndex}
+                          prefetch={false}
+                        >
+                          {el?.subsidiary || "Subsidiary Report"}
+                        </Link>
+                      ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      ) : (
+        <p className="mt-3">No Records to Display</p>
+      )}
     </div>
   );
 }

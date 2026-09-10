@@ -29,7 +29,7 @@ export default function Policies() {
         className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-3 grid-cols-1 gap-7"
       >
         <AnimatePresence>
-          {policiesList?.map((el) => {
+          {[...(policiesList || [])].reverse().map((el) => {
             const pdfHref = buildUploadedAssetUrl(el?.file?.filePath) || "#";
 
             const imageUrl =

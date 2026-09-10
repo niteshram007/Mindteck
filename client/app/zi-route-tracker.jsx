@@ -12,23 +12,31 @@ export default function ZIRouteTracker() {
       return;
     }
 
-    const nextUrl = window.location.href;
-    window.ZIPageurl = nextUrl;
+    const currentUrl = window.location.href;
+    window.ZIPageurl = currentUrl;
 
     if (previousUrlRef.current === null) {
-      previousUrlRef.current = nextUrl;
+      previousUrlRef.current = currentUrl;
       return;
     }
 
-    if (previousUrlRef.current === nextUrl) {
+    if (previousUrlRef.current === currentUrl) {
       return;
     }
 
-    previousUrlRef.current = nextUrl;
+    previousUrlRef.current = currentUrl;
 
-    if (typeof window.zitag?.GetListOfEntitlements === "function") {
-      Promise.resolve(window.zitag.GetListOfEntitlements()).catch(() => {});
-    }
+    const triggerTracking = (retries = 5) => {
+      try {
+        if (typeof window.zitag?.GetListOfEntitlements === "function") {
+          Promise.resolve(window.zitag.GetListOfEntitlements()).catch(() => {});
+        } else if (retries > 0) {
+          setTimeout(() => triggerTracking(retries - 1), 200);
+        }
+      } catch (_err) {}
+    };
+
+    triggerTracking();
   }, [pathname]);
 
   return null;

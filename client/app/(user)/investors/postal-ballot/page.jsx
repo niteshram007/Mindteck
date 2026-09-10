@@ -12,7 +12,7 @@ export default function PostalBallot() {
   const getPostalBallotDataBySession = async () => {
     try {
       const { data } = await axiosInstance("public/postal-ballot/getall");
-      setPostalBallotData(data);
+      setPostalBallotData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.log(error);
     }
@@ -32,6 +32,17 @@ export default function PostalBallot() {
     [postalBallotData],
   );
 
+  const formatFinancialYearDate = (dateVal) => {
+    if (!dateVal) return "";
+    try {
+      const d = new Date(dateVal);
+      if (!isNaN(d.getTime())) {
+        return format(d, "dd MMMM yyyy");
+      }
+    } catch (_) {}
+    return String(dateVal);
+  };
+
   return (
     <div className="font-inter">
       {sortedPostalBallotData.map((el) => (
@@ -46,13 +57,13 @@ export default function PostalBallot() {
                   className="m-auto w-[50px]"
                   alt="report"
                 />
-                <p className="text-2xl font-semibold  text-center mt-3">
-                 {format(el.financialYear, "dd MMMM yyyy")}
+                <p className="text-2xl font-semibold text-center mt-3">
+                  {formatFinancialYearDate(el.financialYear)}
                 </p>
               </div>
               <div className="md:col-span-8 col-span-12">
                 <div className="space-y-1.5">
-                  {el.postals.map((item, subIndex) => (
+                  {Array.isArray(el?.postals) && el.postals.map((item, subIndex) => (
                     <a
                       href={buildUploadedAssetUrl(item?.file?.filePath)}
                       target="_blank"
@@ -62,7 +73,7 @@ export default function PostalBallot() {
                           ? "border-none"
                           : "border-b border-[#858484] "
                       } py-1.5`}
-                      key={item.postalName}
+                      key={item?.postalName || item?.id || subIndex}
                     >
                       {item.postalName}
                     </a>

@@ -24,7 +24,7 @@ const hasLegacyUnscopedPath = (filePath = "") =>
 
 const getUniqueSections = (sections = []) => {
   const seen = new Set();
-  return (Array.isArray(sections) ? sections : []).filter((item) => {
+  const unique = (Array.isArray(sections) ? sections : []).filter((item) => {
     const normalizedPath = normalizeAnnualReportFilePath(item?.file?.filePath);
     const key = `${String(item?.title || "").trim()}::${normalizedPath}`;
     if (seen.has(key)) {
@@ -33,6 +33,17 @@ const getUniqueSections = (sections = []) => {
     seen.add(key);
     return true;
   });
+
+  const getOrder = (title) => {
+    const t = String(title || "").toLowerCase();
+    if (t.includes("annual report")) return 1;
+    if (t.includes("balance sheet")) return 2;
+    if (t.includes("profit & loss") || t.includes("profit and loss") || t.includes("profit &loss")) return 3;
+    if (t.includes("notice of annual general meeting") || t.includes("notice of agm")) return 4;
+    return 5;
+  };
+
+  return unique.sort((a, b) => getOrder(a.title) - getOrder(b.title));
 };
 
 const getFinancialYearStart = (year = "") => {

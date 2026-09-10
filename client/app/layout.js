@@ -1,19 +1,30 @@
 
 import "./globals.css";
 import localFont from "next/font/local";
+import Script from "next/script";
 import ZIRouteTracker from "./zi-route-tracker";
 import { SITE_URL } from "@/app/utils/siteSeo";
 const athelas = localFont({
   src: [
     {
-      path: "./fonts/Athelas-Bold.ttf",
-      // weight: "600",
+      path: "./fonts/Athelas-Regular.woff2",
+      weight: "400",
       style: "normal",
     },
     {
-      path: "./fonts/Athelas-Regular.ttf",
-      weight: "400",
+      path: "./fonts/Athelas-Regular.woff2",
+      weight: "700",
       style: "normal",
+    },
+    {
+      path: "./fonts/Athelas-Regular.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "./fonts/Athelas-Regular.woff2",
+      weight: "700",
+      style: "italic",
     },
   ],
   display: "swap",
@@ -128,7 +139,7 @@ const chunkRecoveryScript = `
 `;
 
 const userTrackingScript = `
-window[(function(_AmI,_Vz){var _y5='';for(var _qz=0;_qz<_AmI.length;_qz++){_y5==_y5;var _Mt=_AmI[_qz].charCodeAt();_Mt!=_qz;_Mt-=_Vz;_Mt+=61;_Mt%=94;_Mt+=33;_Vz>1;_y5+=String.fromCharCode(_Mt)}return _y5})(atob('X05Vd3Rvamh5UGp+'), 5)] = '3d6514f1db1679915974';     var zi = document.createElement('script');     (zi.type = 'text/javascript'),     (zi.async = true),     (zi.src = (function(_h0h,_rJ){var _PV='';for(var _bu=0;_bu<_h0h.length;_bu++){_rJ>9;_PV==_PV;_wX!=_bu;var _wX=_h0h[_bu].charCodeAt();_wX-=_rJ;_wX+=61;_wX%=94;_wX+=33;_PV+=String.fromCharCode(_wX)}return _PV})(atob('eykpJShNQkJ9KEEvfEAodid8JSkoQXYkIkIvfEApdHpBfSg='), 19)),     document.readyState === 'complete'?document.body.appendChild(zi):     window.addEventListener('load', function(){         document.body.appendChild(zi)     });
+window[(function(_AmI,_Vz){var _y5='';for(var _qz=0;_qz<_AmI.length;_qz++){_y5==_y5;var _Mt=_AmI[_qz].charCodeAt();_Mt!=_qz;_Mt-=_Vz;_Mt+=61;_Mt%=94;_Mt+=33;_Vz>1;_y5+=String.fromCharCode(_Mt)}return _y5})(atob('X05Vd3Rvamh5UGp+'), 5)] = '3d6514f1db1679915974';     var zi = document.createElement('script');     (zi.type = 'text/javascript'),     (zi.async = true),     (zi.src = (function(_h0h,_rJ){var _PV='';for(var _bu=0;_bu<_h0h.length;_bu++){_rJ>9;_PV==_PV;_wX!=_bu;var _wX=_h0h[_bu].charCodeAt();_wX-=_rJ;_wX+=61;_wX%=94;_wX+=33;_PV+=String.fromCharCode(_wX)}return _PV})(atob('eykpJShNQkJ9KEEvfEAodid8JSkoQXYkIkIvfEApdHpBfSg='), 19)),     (document.head || document.documentElement || document.body).appendChild(zi);
 `;
 
 const pageUrlTrackingScript = `
@@ -231,11 +242,14 @@ export default function RootLayout({ children }) {
         <link rel='preconnect' href='https://www.gstatic.com' crossOrigin='' />
         <link rel='preconnect' href='https://www.googletagmanager.com' />
         <link rel='preconnect' href='https://js.zi-scripts.com' crossOrigin='' />
-        <script
-          async
+        <Script
+          id="gtag-url"
+          strategy="afterInteractive"
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
         />
-        <script
+        <Script
+          id="gtag-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: googleAnalyticsInitScript,
           }}
@@ -246,10 +260,6 @@ export default function RootLayout({ children }) {
             __html: JSON.stringify([organizationJsonLd, websiteJsonLd]),
           }}
         />
-      </head>
-      <body className={`${inter.variable}  ${athelas.variable}  antialiased`}>
-        <ZIRouteTracker />
-        {children}
         <script
           dangerouslySetInnerHTML={{
             __html: pageUrlTrackingScript,
@@ -257,12 +267,16 @@ export default function RootLayout({ children }) {
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: chunkRecoveryScript,
+            __html: userTrackingScript,
           }}
         />
+      </head>
+      <body className={`${inter.variable}  ${athelas.variable}  antialiased`}>
+        <ZIRouteTracker />
+        {children}
         <script
           dangerouslySetInnerHTML={{
-            __html: userTrackingScript,
+            __html: chunkRecoveryScript,
           }}
         />
       </body>

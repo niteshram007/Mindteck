@@ -12,29 +12,37 @@ const getFinancialYearStart = (year = "") => {
 };
 
 const resolveStockExchangeYearMeta = async () => {
-  const { data } = await axiosInstance("public/stock-exchange-filing/getBySession", {
-    params: {
-      session: "",
-    },
-  });
+  try {
+    const { data } = await axiosInstance("public/stock-exchange-filing/getBySession", {
+      params: {
+        session: "",
+      },
+    });
 
-  const yearList = (Array.isArray(data) ? data : [])
-    .filter(
-      (item) =>
-        item?.financialYear &&
-        Array.isArray(item?.stockExchangeFilings) &&
-        item.stockExchangeFilings.length > 0,
-    )
-    .map((item) => item.financialYear);
+    const yearList = (Array.isArray(data) ? data : [])
+      .filter(
+        (item) =>
+          item?.financialYear &&
+          Array.isArray(item?.stockExchangeFilings) &&
+          item.stockExchangeFilings.length > 0,
+      )
+      .map((item) => item.financialYear);
 
-  const availableYears = [...new Set(yearList)].sort(
-    (left, right) => getFinancialYearStart(right) - getFinancialYearStart(left),
-  );
+    const availableYears = [...new Set(yearList)].sort(
+      (left, right) => getFinancialYearStart(right) - getFinancialYearStart(left),
+    );
 
-  return {
-    availableYears,
-    latestYear: availableYears[0] || "",
-  };
+    return {
+      availableYears,
+      latestYear: availableYears[0] || "",
+    };
+  } catch (error) {
+    console.error("Error resolving stock exchange years:", error?.message || error);
+    return {
+      availableYears: [],
+      latestYear: "",
+    };
+  }
 };
 
 export default async function page({ searchParams }) {

@@ -126,7 +126,7 @@ export default async function page({ params }) {
           __html: JSON.stringify(newsArticleJsonLd),
         }}
       />
-      <h1 className="font-athelas text-primary font-semibold text-3xl mb-2">
+      <h1 className="font-athelas text-primary font-normal text-3xl mb-2">
         {mainHeading}
       </h1>
       {showSubHeading && (

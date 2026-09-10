@@ -43,6 +43,7 @@ const defaultValues = {
   title: "",
   description: "",
   content: "",
+  zoomScript: "",
   isActive: false,
   category: [],
 };
@@ -51,6 +52,7 @@ const formSchema = z.object({
   title: z.string().min(1, { message: "Required" }),
   description: z.string().min(1, { message: "Required" }),
   content: z.string().optional(),
+  zoomScript: z.string().optional(),
   isActive: z.boolean(),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
@@ -198,10 +200,20 @@ export default function AddUpdateCaseStudy({
           .filter(Boolean)
       : [];
 
+    let packedContent = data.content ?? row?.content ?? "";
+    if (data.zoomScript && data.zoomScript.trim().length > 0) {
+      try {
+        const base64Script = btoa(data.zoomScript.trim());
+        packedContent += `\n<div data-zoom-script='true' style='display:none;'>${base64Script}</div>`;
+      } catch (e) {
+        console.error("Failed to pack zoom script", e);
+      }
+    }
+
     mutation.mutate({
       ...data,
       file: filePayload ? { ...filePayload } : undefined,
-      content: data.content ?? row?.content ?? "",
+      content: packedContent,
       category: selectedCategories,
     });
   }
@@ -244,9 +256,22 @@ export default function AddUpdateCaseStudy({
       const filterSelectItems = category?.filter((el) =>
         selectedCategoryValues.has(normalizeCategoryPath(el.value)),
       );
+
+      let unpackedContent = row?.content ?? "";
+      let unpackedZoomScript = "";
+      
+      const zoomMatch = unpackedContent.match(/<div data-zoom-script='true' style='display:none;'>(.*?)<\/div>/);
+      if (zoomMatch) {
+        try {
+          unpackedZoomScript = atob(zoomMatch[1]);
+          unpackedContent = unpackedContent.replace(zoomMatch[0], "").trim();
+        } catch(e) {}
+      }
+
       form.reset({
         ...row,
-        content: row?.content ?? "",
+        content: unpackedContent,
+        zoomScript: unpackedZoomScript,
         category: filterSelectItems?.map((el) => ({
           value: el.value,
           label: el.label,
@@ -361,8 +386,31 @@ export default function AddUpdateCaseStudy({
                             defaultValue={field.value || ""}
                             setContent={field.onChange}
                             dense={compactSpacing}
+                            imageUploadPath="case-study/upload"
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="zoomScript"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Zoom Tracking Script (Optional)</FormLabel>
+                        <FormControl>
+                          <textarea
+                            placeholder="Paste Zoom tracking script here..."
+                            {...field}
+                            className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          />
+                        </FormControl>
+                        <p className="text-[13px] text-muted-foreground mt-1">
+                          This script will be injected into the page automatically and remain hidden from view.
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
